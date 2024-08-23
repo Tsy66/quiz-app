@@ -7,7 +7,7 @@
         <hr>
         <li><a href="/levels">學生表現</a></li>
         <hr>
-        <li><a href="#">學習分析</a></li>
+        <li><a href="/quiz">學習分析</a></li>
         <hr>
       </ul>
     </div>
