@@ -13,7 +13,7 @@ const routes = [
   { path: '/class', name: 'Class', component: Class },
   { path: '/fallback', name: 'Fallback', component: Fallback },
   { path: '/levels', name: 'Levels', component: Levels },
-  { path: '/quiz', name: 'Quiz', component: Quiz },
+  { path: '/quiz/:quizId', name: 'Quiz', component: Quiz, props: true, },
 ]
 
 const router = createRouter({

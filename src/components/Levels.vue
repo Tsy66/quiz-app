@@ -12,24 +12,21 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router';
+
 export default {
-  name: 'LevelOverview',
+  name: 'Levels',
   data() {
     return {
       levels: Array.from({ length: 25 }, (_, i) => ({
-        id: i + 1,
-        // status: this.getRandomStatus(), // 關卡狀態邏輯已被註解掉
+        id: `ch${i + 1}`,
       })),
     };
   },
   methods: {
-    // getRandomStatus() {
-    //   const statuses = ['completed', 'in-progress', 'locked'];
-    //   return statuses[Math.floor(Math.random() * statuses.length)];
-    // },
     selectLevel(levelId) {
-      alert(`你選擇了關卡 ${levelId}`);
-      // 在此處可以添加更多的邏輯，如導航到該關卡的詳細頁面
+      // 使用 this.$router 來進行路由導航
+      this.$router.push({ name: 'Quiz', params: { quizId: levelId } });
     },
   },
 };

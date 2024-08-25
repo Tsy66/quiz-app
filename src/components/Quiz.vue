@@ -1,39 +1,77 @@
 <template>
-    <div class="question-page">
-      <h2>ch1-1</h2>
-      <div class="question-box">
-        <p>{{ currentQuestion.question }}</p>
-      </div>
-      <div class="options">
-        <label v-for="(option, index) in currentQuestion.options" :key="index" class="option">
-          <input type="radio" :value="option" v-model="selectedOption" @change="submitAnswer(option)" />
-          {{ option }}
-        </label>
-      </div>
+  <div class="question-page">
+    <h2>{{ quizTitle }}</h2>
+    <div class="question-box">
+      <p>{{ currentQuestion.question }}</p>
     </div>
-  </template>
+    <div class="options">
+      <label v-for="(option, index) in currentQuestion.choices" :key="index" class="option">
+        <input type="radio" :value="option.choice" v-model="selectedOption" @change="submitAnswer(option)" />
+        {{ option.choice }}
+      </label>
+    </div>
+  </div>
+</template>
   
-  <script>
-  export default {
-    name: 'QuestionPage',
-    data() {
+<script>
+import { db } from "@/config/firebaseConfig";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+
+export default {
+  name: 'Quiz',
+  data() {
+    return {
+      quizTitle: '',
+      quiznum: '',
+      currentQuestion: {
+        question: '',
+        choices: [],
+      },
+      selectedOption: null,
+    };
+  },
+  async created() {
+  const quizId = this.$route.params.quizId;
+  const quizzesRef = collection(db, "quizzes");
+  const q = query(quizzesRef, where("quiz_id", "==", quizId));
+  const quizSnapshot = await getDocs(q);
+  
+  if (!quizSnapshot.empty) {
+    const quizDoc = quizSnapshot.docs[0];
+    this.quizTitle = quizDoc.data().title;
+
+    const questionsCollectionRef = collection(quizDoc.ref, "questions");
+    const questionSnapshot = await getDocs(questionsCollectionRef);
+
+    const questionsPromises = questionSnapshot.docs.map(async questionDoc => {
+      const choicesCollectionRef = collection(questionDoc.ref, "choices");
+      const choicesSnapshot = await getDocs(choicesCollectionRef);
+
+      const choices = choicesSnapshot.docs.map(choiceDoc => ({
+        choice: choiceDoc.data().choice,
+        isRight: choiceDoc.data().is_right_choice,
+      }));
+
       return {
-        currentQuestion: {
-          question: "睡到七點",
-          options: ["7時まで寝ました。", " 7時から寝ました。", " 7時のが寝ました。", " 7時まで寝ますか。"]
-        },
-        selectedOption: null
+        question: questionDoc.data().question,
+        choices: choices,
       };
+    });
+
+    const questionsData = await Promise.all(questionsPromises);
+    this.currentQuestion = questionsData[0]; // 預設顯示第一個問題
+  } else {
+    console.error(`Quiz with quiz_id ${quizId} not found.`);
+  }
+},
+  methods: {
+    submitAnswer(option) {
+      this.selectedOption = option.choice;
+      alert(`你選擇了: ${option.choice}`);
     },
-    // methods: {
-    //   submitAnswer(option) {
-    //     this.selectedOption = option;
-    //     alert(`你選擇了: ${option}`);
-    //     // 此處可加入額外的邏輯，例如驗證答案或進行下一步操作
-    //   }
-    // }
-  };
-  </script>
+  },
+};
+</script>
   
   <style scoped>
   .question-page {
