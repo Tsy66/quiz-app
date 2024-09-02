@@ -1,5 +1,5 @@
-const staticCacheName = 'static-static-v2';
-const dynamicCacheName = 'site-dynamic-v1';
+const staticCacheName = 'static-static-v3';
+const dynamicCacheName = 'site-dynamic-v2';
 const assets = [
   '/',
   '/index.html',
@@ -12,7 +12,7 @@ const assets = [
   '/src/components/Home.vue',
   '/src/components/Login.vue',
   '/src/components/Class.vue',
-  // '/src/components/levels.html',
+  '/src/components/Levels.vue',
   '/src/components/Fallback.vue',
   'https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap',
 ];

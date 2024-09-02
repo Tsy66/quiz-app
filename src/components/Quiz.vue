@@ -1,6 +1,6 @@
 <template>
   <div class="question-page">
-    <h2>{{ quizTitle }}</h2>
+    <h4>{{ quizTitle }}</h4>
     <div class="question-box">
       <p>{{ currentQuestion.question }}</p>
     </div>
@@ -8,16 +8,28 @@
       <label
         v-for="(option, index) in currentQuestion.choices"
         :key="index"
-        :class="['option', { selected: selectedOption === option.choice }]"
+        :class="[
+          'option', 
+          { 
+            selected: selectedOption === option.choice,
+            correct: isAnswerChecked && option.isRight,
+            incorrect: isAnswerChecked && selectedOption === option.choice && !option.isRight
+          }
+        ]"
       >
-        <input type="radio" :value="option.choice" v-model="selectedOption" />
+        <input 
+          type="radio" 
+          :value="option.choice" 
+          v-model="selectedOption" 
+          :disabled="isAnswerChecked" 
+        />
         {{ option.choice }}
       </label>
     </div>
     <button v-if="selectedOption && !isAnswerChecked" @click="submitAnswer" class="next-button">提交</button>
     <div v-if="isAnswerChecked" class="result-message">
       {{ resultMessage }}
-      <audio ref="resultAudio" src=""></audio> <!-- 加入音效元素 -->
+      <audio ref="resultAudio" src=""></audio>
     </div>
     <button v-if="isAnswerChecked" @click="nextQuestion" class="next-button">繼續</button>
   </div>
@@ -41,8 +53,8 @@ export default {
       selectedOption: null,
       questions: [],
       currentIndex: 0,
-      isAnswerChecked: false, // 用來標記是否已檢查答案
-      resultMessage: '', // 顯示選擇結果
+      isAnswerChecked: false,
+      resultMessage: '',
     };
   },
   async created() {
@@ -81,11 +93,6 @@ export default {
       console.error(`Quiz with quiz_id ${quizId} not found.`);
     }
   },
-  mounted() {
-    this.$nextTick(() => {
-      console.log(this.$refs.resultAudio); // 應該顯示 audio 元素
-    });
-  },
   methods: {
     async submitAnswer() {
       const selectedChoice = this.currentQuestion.choices.find(
@@ -95,11 +102,11 @@ export default {
 
       if (selectedChoice.isRight) {
         this.resultMessage = "恭喜！你選對了。";
-        await this.$nextTick(); // 等待 DOM 更新
+        await this.$nextTick();
         this.playAudio('correct');
       } else {
         this.resultMessage = "很抱歉，這不是正確答案。";
-        await this.$nextTick(); // 等待 DOM 更新
+        await this.$nextTick();
         this.playAudio('incorrect');
       }
     },
@@ -107,9 +114,9 @@ export default {
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex++;
         this.currentQuestion = this.questions[this.currentIndex];
-        this.selectedOption = null; // 重置選擇的選項
-        this.isAnswerChecked = false; // 重置答案檢查狀態
-        this.resultMessage = ''; // 清空結果訊息
+        this.selectedOption = null;
+        this.isAnswerChecked = false;
+        this.resultMessage = '';
       } else {
         alert("你已完成所有題目！");
       }
@@ -142,7 +149,7 @@ export default {
   margin-top: 5rem;
 }
 
-h2 {
+h4 {
   text-align: center;
   margin-bottom: 1rem;
   color: #32b16d;
@@ -180,6 +187,14 @@ h2 {
 
 .option.selected {
   background-color: #b3e5fc;
+}
+
+.option.correct {
+  background-color: #a5d6a7; /* 綠色表示正確答案 */
+}
+
+.option.incorrect {
+  background-color: #ef9a9a; /* 紅色表示錯誤答案 */
 }
 
 .option input {
