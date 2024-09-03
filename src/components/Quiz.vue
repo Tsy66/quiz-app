@@ -145,13 +145,14 @@ export default {
   border-radius: 1rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #f9f9f9;
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin-top: 5rem;
 }
 
 h4 {
   text-align: center;
   margin-bottom: 1rem;
+  font-size: 2rem;
   color: #32b16d;
 }
 
@@ -159,7 +160,7 @@ h4 {
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: bold;
   margin-bottom: 2rem;
-  padding: 1.5rem;
+  padding: 1.3rem;
   border: 1px solid #32b16d;
   border-radius: 0.5rem;
   background-color: #fff;
@@ -208,6 +209,9 @@ h4 {
 }
 
 .next-button {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: bold;
+  width: 100%;
   margin-top: 2rem;
   padding: 0.8rem 1.5rem;
   background-color: #32b16d;

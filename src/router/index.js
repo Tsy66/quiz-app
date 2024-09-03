@@ -6,6 +6,7 @@ import Class from '@/components/Class.vue';
 import Fallback from '@/components/Fallback.vue';
 import Levels from '@/components/Levels.vue';
 import Quiz from '@/components/Quiz.vue';
+import QuizResult from '@/components/QuizResult.vue';
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -14,6 +15,7 @@ const routes = [
   { path: '/fallback', name: 'Fallback', component: Fallback },
   { path: '/levels', name: 'Levels', component: Levels },
   { path: '/quiz/:quizId', name: 'Quiz', component: Quiz, props: true, },
+  { path: '/quizresult', name: 'QuizResult', component: QuizResult},
 ]
 
 const router = createRouter({

@@ -68,9 +68,9 @@ img{
   padding: 1rem;
   max-width: 100%;
   margin: 1rem auto;
-  border-radius: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #f9f9f9;
+  border-radius: 1.5rem;
+  box-shadow: 0 -4px 8px rgba(248, 244, 12, 0.874), 0 4px 8px rgba(10, 184, 178, 0.751);
+  background-color: #f9f9f982;
   font-size: 1.3rem;
   margin-top: 5rem;
 }
