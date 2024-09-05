@@ -1,6 +1,9 @@
 <template>
   <div class="question-page">
     <h4>{{ quizTitle }}</h4>
+    <div class="progress-bar">
+      <div class="progress" :style="{ width: progressWidth + '%' }"></div>
+    </div>
     <div class="question-box">
       <p>{{ currentQuestion.question }}</p>
     </div>
@@ -27,7 +30,7 @@
       </label>
     </div>
     <button v-if="selectedOption && !isAnswerChecked" @click="submitAnswer" class="next-button">提交</button>
-    <div v-if="isAnswerChecked" class="result-message">
+    <div v-if="isAnswerChecked" :class="['result-message', messageClass]">
       {{ resultMessage }}
       <audio ref="resultAudio" src=""></audio>
     </div>
@@ -55,6 +58,10 @@ export default {
       currentIndex: 0,
       isAnswerChecked: false,
       resultMessage: '',
+      successMessages: ["正解!いいね!!", "太厲害了!かんぺき!!", "你做到了!すごい!!"],
+      failureMessages: ["可惜!再接再厲!!", "差一點!加油!!", "沒關係!下次會更好!!"],
+      messageClass: "",
+      progressWidth: 0,
     };
   },
   async created() {
@@ -63,7 +70,7 @@ export default {
     const quizzesRef = collection(db, "quizzes");
     const q = query(quizzesRef, where("quiz_id", "==", quizId));
     const quizSnapshot = await getDocs(q);
-  
+
     if (!quizSnapshot.empty) {
       const quizDoc = quizSnapshot.docs[0];
       this.quizTitle = quizDoc.data().title;
@@ -76,10 +83,12 @@ export default {
         const choicesCollectionRef = collection(questionDoc.ref, "choices");
         const choicesSnapshot = await getDocs(choicesCollectionRef);
 
-        const choices = choicesSnapshot.docs.map(choiceDoc => ({
+        let choices = choicesSnapshot.docs.map(choiceDoc => ({
           choice: choiceDoc.data().choice,
           isRight: choiceDoc.data().is_right_choice,
         }));
+        // 在初次設置問題時打亂選項
+        choices = this.shuffleArray(choices);
 
         return {
           question: questionDoc.data().question,
@@ -89,11 +98,20 @@ export default {
 
       this.questions = await Promise.all(questionsPromises);
       this.currentQuestion = this.questions[this.currentIndex];
+      this.updateProgress();
     } else {
       console.error(`Quiz with quiz_id ${quizId} not found.`);
     }
   },
   methods: {
+    shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    },
+    updateProgress() {
+      const totalQuestions = this.questions.length;
+      const currentProgress = (this.currentIndex / totalQuestions) * 100;
+      this.progressWidth = currentProgress;
+    },
     async submitAnswer() {
       const selectedChoice = this.currentQuestion.choices.find(
         (choice) => choice.choice === this.selectedOption
@@ -101,11 +119,13 @@ export default {
       this.isAnswerChecked = true;
 
       if (selectedChoice.isRight) {
-        this.resultMessage = "恭喜！你選對了。";
+        this.resultMessage = this.successMessages[Math.floor(Math.random() * this.successMessages.length)];
+        this.messageClass = "success";
         await this.$nextTick();
         this.playAudio('correct');
       } else {
-        this.resultMessage = "很抱歉，這不是正確答案。";
+        this.resultMessage = this.failureMessages[Math.floor(Math.random() * this.failureMessages.length)];
+        this.messageClass = "failure";
         await this.$nextTick();
         this.playAudio('incorrect');
       }
@@ -114,11 +134,14 @@ export default {
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex++;
         this.currentQuestion = this.questions[this.currentIndex];
+        this.currentQuestion.choices = this.shuffleArray(this.currentQuestion.choices);
         this.selectedOption = null;
         this.isAnswerChecked = false;
         this.resultMessage = '';
+        this.updateProgress();
       } else {
-        alert("你已完成所有題目！");
+        this.progressWidth = 100;
+        this.$router.push({ name: 'QuizResult' });
       }
     },
     playAudio(result) {
@@ -132,14 +155,15 @@ export default {
       } else {
         console.error('Audio element is undefined');
       }
-    },
-  },
+    }
+  }
 };
 </script>
   
 <style scoped>
 .question-page {
-  max-width: 35rem;
+  max-width: 30rem;
+  max-height: 50rem;
   margin: 1.5rem auto;
   padding: 1.3rem;
   border-radius: 1rem;
@@ -160,7 +184,7 @@ h4 {
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: bold;
   margin-bottom: 2rem;
-  padding: 1.3rem;
+  padding: 1rem 1rem;
   border: 1px solid #32b16d;
   border-radius: 0.5rem;
   background-color: #fff;
@@ -203,16 +227,24 @@ h4 {
 }
 
 .result-message {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   font-size: 1.2rem;
-  color: #f44336;
 }
+
+.success {
+  color: green;
+}
+
+.failure {
+  color: red;
+}
+
 
 .next-button {
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: bold;
   width: 100%;
-  margin-top: 2rem;
+  margin-top: 0.5rem;
   padding: 0.8rem 1.5rem;
   background-color: #32b16d;
   color: white;
@@ -225,5 +257,21 @@ h4 {
 
 .next-button:hover {
   background-color: #28a15a;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #32b16d;
+  width: 0%;
+  transition: width 0.4s ease-in-out;
 }
 </style>

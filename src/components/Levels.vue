@@ -69,7 +69,7 @@ img{
   max-width: 100%;
   margin: 1rem auto;
   border-radius: 1.5rem;
-  box-shadow: 0 -4px 8px rgba(248, 244, 12, 0.874), 0 4px 8px rgba(10, 184, 178, 0.751);
+  box-shadow: 0 -4px 8px rgba(237, 175, 205, 0.874), 0 4px 8px rgba(236, 229, 17, 0.751);
   background-color: #f9f9f982;
   font-size: 1.3rem;
   margin-top: 5rem;
@@ -84,6 +84,8 @@ img{
   width: 100%;
   max-height: 30rem;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ece55e #f1f1f1;
 }
 
 .level-circle {

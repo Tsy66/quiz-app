@@ -1,14 +1,13 @@
 <template>
-    <div class="result-page">
-      <h2>答題結果</h2>
-      <div class="result-summary">
-        <p>總分: {{ score }}/{{ totalQuestions }}</p>
-        <p>正確題數: {{ correctCount }}</p>
-        <p>錯誤題數: {{ incorrectCount }}</p>
-      </div>
-      <div class="actions">
-        <button @click="goHome" class="action-button">返回主頁</button>
-        <button @click="retryQuiz" class="action-button">重新開始</button>
+    <div class="page-container">
+      <div class="result-page">
+        <h3>試験終了</h3>
+        <div class="result-summary">
+          <p>總分: {{ score }}/{{ totalQuestions }}</p>
+        </div>
+        <div class="actions">
+          <button @click="goHome" class="action-button">返回主頁</button>
+        </div>
       </div>
     </div>
   </template>
@@ -25,35 +24,38 @@
       };
     },
     async created() {
-      // 假設你在 route query 中傳遞了結果數據
       this.score = this.$route.query.score || 0;
       this.totalQuestions = this.$route.query.totalQuestions || 0;
-      this.correctCount = this.$route.query.correctCount || 0;
-      this.incorrectCount = this.$route.query.incorrectCount || 0;
     },
     methods: {
       goHome() {
-        this.$router.push({ name: 'home' });  // 假設有一個名為 'home' 的路由
-      },
-      retryQuiz() {
-        this.$router.push({ name: 'quiz', params: { quizId: this.$route.query.quizId } });
-      },
+        this.$router.push({ name: 'Levels' });
+      }
     },
   };
   </script>
   
   <style scoped>
+  .page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
   .result-page {
-    max-width: 35rem;
-    margin: 2rem auto;
-    padding: 1.5rem;
+    max-width: 40rem;
+    margin: 1rem auto;
+    padding: 3rem;
     border-radius: 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
     text-align: center;
   }
   
-  h2 {
+  h3 {
     color: #32b16d;
     margin-bottom: 1rem;
   }
@@ -70,6 +72,8 @@
   }
   
   .action-button {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: bold;
     padding: 0.8rem 1.5rem;
     background-color: #32b16d;
     color: white;

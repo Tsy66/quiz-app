@@ -13,6 +13,7 @@ const assets = [
   '/src/components/Login.vue',
   '/src/components/Class.vue',
   '/src/components/Levels.vue',
+  '/src/components/Sidebar.vue',
   '/src/components/Fallback.vue',
   '/src/components/Quiz.vue',
   '/src/components/QuizResult.vue',
