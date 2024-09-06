@@ -6,7 +6,6 @@ const assets = [
   '/src/assets/materialize.min.css',
   '/src/assets/styles.css',
   '/materialize.min.js',
-  '/ui.js',
   '/app.js',
   '/manifest.json',
   '/src/components/Home.vue',

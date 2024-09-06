@@ -1,40 +1,42 @@
 <template>
-  <div class="question-page">
-    <h4>{{ quizTitle }}</h4>
-    <div class="progress-bar">
-      <div class="progress" :style="{ width: progressWidth + '%' }"></div>
+  <div class="page-container">
+    <div class="question-page">
+      <h4>{{ quizTitle }}</h4>
+      <div class="progress-bar">
+        <div class="progress" :style="{ width: progressWidth + '%' }"></div>
+      </div>
+      <div class="question-box">
+        <p>{{ currentQuestion.question }}</p>
+      </div>
+      <div class="options">
+        <label
+          v-for="(option, index) in currentQuestion.choices"
+          :key="index"
+          :class="[
+            'option', 
+            { 
+              selected: selectedOption === option.choice,
+              correct: isAnswerChecked && option.isRight,
+              incorrect: isAnswerChecked && selectedOption === option.choice && !option.isRight
+            }
+          ]"
+        >
+          <input 
+            type="radio" 
+            :value="option.choice" 
+            v-model="selectedOption" 
+            :disabled="isAnswerChecked" 
+          />
+          {{ option.choice }}
+        </label>
+      </div>
+      <button v-if="selectedOption && !isAnswerChecked" @click="submitAnswer" class="next-button">提交</button>
+      <div v-if="isAnswerChecked" :class="['result-message', messageClass]">
+        {{ resultMessage }}
+        <audio ref="resultAudio" src=""></audio>
+      </div>
+      <button v-if="isAnswerChecked" @click="nextQuestion" class="next-button">繼續</button>
     </div>
-    <div class="question-box">
-      <p>{{ currentQuestion.question }}</p>
-    </div>
-    <div class="options">
-      <label
-        v-for="(option, index) in currentQuestion.choices"
-        :key="index"
-        :class="[
-          'option', 
-          { 
-            selected: selectedOption === option.choice,
-            correct: isAnswerChecked && option.isRight,
-            incorrect: isAnswerChecked && selectedOption === option.choice && !option.isRight
-          }
-        ]"
-      >
-        <input 
-          type="radio" 
-          :value="option.choice" 
-          v-model="selectedOption" 
-          :disabled="isAnswerChecked" 
-        />
-        {{ option.choice }}
-      </label>
-    </div>
-    <button v-if="selectedOption && !isAnswerChecked" @click="submitAnswer" class="next-button">提交</button>
-    <div v-if="isAnswerChecked" :class="['result-message', messageClass]">
-      {{ resultMessage }}
-      <audio ref="resultAudio" src=""></audio>
-    </div>
-    <button v-if="isAnswerChecked" @click="nextQuestion" class="next-button">繼續</button>
   </div>
 </template>
   
@@ -62,6 +64,7 @@ export default {
       failureMessages: ["可惜!再接再厲!!", "差一點!加油!!", "沒關係!下次會更好!!"],
       messageClass: "",
       progressWidth: 0,
+      correctCount: 0,
     };
   },
   async created() {
@@ -119,6 +122,7 @@ export default {
       this.isAnswerChecked = true;
 
       if (selectedChoice.isRight) {
+        this.correctCount++;  // 答對時累加
         this.resultMessage = this.successMessages[Math.floor(Math.random() * this.successMessages.length)];
         this.messageClass = "success";
         await this.$nextTick();
@@ -140,7 +144,10 @@ export default {
         this.resultMessage = '';
         this.updateProgress();
       } else {
-        this.progressWidth = 100;
+        localStorage.setItem('quizResult', JSON.stringify({
+          correctCount: this.correctCount,
+          totalQuestions: this.questions.length
+        }));
         this.$router.push({ name: 'QuizResult' });
       }
     },
@@ -161,13 +168,23 @@ export default {
 </script>
   
 <style scoped>
+.page-container {
+  background-color: rgb(129, 177, 250);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 .question-page {
   max-width: 30rem;
   max-height: 50rem;
   margin: 1.5rem auto;
   padding: 1.3rem;
   border-radius: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -4px 8px rgb(185, 204, 252), 0 4px 8px rgb(245, 245, 245);
   background-color: #f9f9f9;
   font-size: 1rem;
   margin-top: 5rem;
@@ -215,11 +232,11 @@ h4 {
 }
 
 .option.correct {
-  background-color: #a5d6a7; /* 綠色表示正確答案 */
+  background-color: #a5d6a7;
 }
 
 .option.incorrect {
-  background-color: #ef9a9a; /* 紅色表示錯誤答案 */
+  background-color: #ef9a9a;
 }
 
 .option input {

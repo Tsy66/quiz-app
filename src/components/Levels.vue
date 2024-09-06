@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="level-overview">
         <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhShXin0WCfbKIH6ByqHX3m2knmP4dzwdIkiRK-EwMsMEEns3zOkwhZ78Rk6G7MdWID_0Ih8FdEGGn1wkhWNo4xHpr4rsSBM5JD4NfuZfSJim9-QYH9KokeK_vCHHeFeRViH7cBtWXYtBg/s400/juken_goukaku_ema.png" alt="合格絵馬" />
-      <h2>Levels</h2>
+      <h2>レベル</h2>
       <div class="levels-container">
         <div v-for="level in levels" :key="level.id" 
              class="level-circle"
@@ -41,6 +41,7 @@ meta[name="viewport"] {
 }
 
 .page-container {
+  background-color: rgb(129, 177, 250);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -68,9 +69,9 @@ img{
   padding: 1rem;
   max-width: 100%;
   margin: 1rem auto;
-  border-radius: 1.5rem;
-  box-shadow: 0 -4px 8px rgba(237, 175, 205, 0.874), 0 4px 8px rgba(236, 229, 17, 0.751);
-  background-color: #f9f9f982;
+  border-radius: 2.5rem;
+  box-shadow: 0 -4px 8px rgb(223, 222, 222), 0 4px 8px rgb(255, 247, 15);
+  background-color: #ffffff;
   font-size: 1.3rem;
   margin-top: 5rem;
 }

@@ -3,7 +3,7 @@
       <div class="result-page">
         <h3>試験終了</h3>
         <div class="result-summary">
-          <p>總分: {{ score }}/{{ totalQuestions }}</p>
+          <p>{{ correctCount }}/{{ totalQuestions }}</p>
         </div>
         <div class="actions">
           <button @click="goHome" class="action-button">返回主頁</button>
@@ -17,15 +17,16 @@
     name: 'QuizResult',
     data() {
       return {
-        score: 0,
-        totalQuestions: 0,
         correctCount: 0,
-        incorrectCount: 0,
+        totalQuestions: 0
       };
     },
-    async created() {
-      this.score = this.$route.query.score || 0;
-      this.totalQuestions = this.$route.query.totalQuestions || 0;
+    created() {
+      const result = JSON.parse(localStorage.getItem('quizResult'));
+      if (result) {
+        this.correctCount = result.correctCount;
+        this.totalQuestions = result.totalQuestions;
+      }
     },
     methods: {
       goHome() {
@@ -37,6 +38,7 @@
   
   <style scoped>
   .page-container {
+    background-color: rgb(129, 177, 250);
     display: flex;
     justify-content: center;
     align-items: center;
