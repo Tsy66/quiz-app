@@ -45,6 +45,10 @@
     height: 100vh;
     margin: 0;
     padding: 0;
+    background-image: url('https://images.unsplash.com/photo-1599173704879-2e407aa34cde?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .result-page {
@@ -53,7 +57,7 @@
     padding: 3rem;
     border-radius: 1rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
+    background-color: #f9f9f9dc;
     text-align: center;
   }
   

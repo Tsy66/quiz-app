@@ -1,22 +1,24 @@
 <template>
-  <div class="container">
-    <div class="top"></div>
-    <h3>ログイン</h3>
-    <form id="login-form" @submit.prevent="signIn">
-      <div class="input-field">
-        <input type="text" id="email" placeholder="帳號 アカウント" v-model="email" required>
-        <label for="email"></label>
-      </div>
-      <div class="input-field">
-        <input type="password" id="password" placeholder="密碼 パスワード" v-model="password" required>
-        <label for="password"></label>
-        <span id="toggle-password" @click="togglePasswordVisibility">
-          <i class="fas fa-eye"></i>
-        </span>
-      </div>
-      <button type="submit" class="btn waves-effect waves-light">登入</button>
-      <p v-if="error">{{ error }}</p>
-    </form>
+  <div class="page-container">
+    <div class="container">
+      <div class="top"></div>
+      <h3>ログイン</h3>
+      <form id="login-form" @submit.prevent="signIn">
+        <div class="input-field">
+          <input type="text" id="email" placeholder="帳號 アカウント" v-model="email" required>
+          <label for="email"></label>
+        </div>
+        <div class="input-field">
+          <input type="password" id="password" placeholder="密碼 パスワード" v-model="password" required>
+          <label for="password"></label>
+          <span id="toggle-password" @click="togglePasswordVisibility">
+            <i :class="passwordIcon"></i>
+          </span>
+        </div>
+        <button type="submit" class="btn waves-effect waves-light">登入</button>
+        <p v-if="error">{{ error }}</p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -96,36 +98,49 @@ export default {
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap');
   
-  body, button, input {
-      font-family: "Darumadrop One", "DotGothic16";
-      font-weight: 400;
-      font-style: normal;
+  body, button, input, h3 {
+    font-family: "Darumadrop One", "DotGothic16";
+    font-weight: 400;
+    font-style: normal;
   }
-  
+
+  .page-container {
+    background-image: url('https://images.unsplash.com/photo-1557409518-691ebcd96038?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    height: 100vh;
+  }
+
   .top{
-      width: 100%;
-      max-width: 400px;
-      padding: 5rem;
+    width: 100%;
+    max-width: 400px;
+    padding: 5rem;
   }
   
   .container {
     width: 100%;
     max-width: 400px;
-    background: #fff;
+    background: #ffffff00;
     padding: 2rem;
   }
   
   h3 {
     text-align: center;
+    color: #FFFD96;
   }
   
   .btn {
     margin-left: 40%;
     border-radius: 8px;
+    background-color: #FFFD96;
+    color: #7F576F;
+    font-weight: 500;
   }
   
   .input-field {
-    position: relative;
+    position: relative;;
   }
   
   #toggle-password {
@@ -138,6 +153,6 @@ export default {
   
   #toggle-password i {
       font-size: 1.2em;
-      color: #aaa;
+      color: #d2d073;
   }
 </style>

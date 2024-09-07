@@ -176,6 +176,10 @@ export default {
   height: 100vh;
   margin: 0;
   padding: 0;
+  background-image: url('https://images.unsplash.com/photo-1542931287-023b922fa89b?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .question-page {
@@ -193,12 +197,11 @@ export default {
 h4 {
   text-align: center;
   margin-bottom: 1rem;
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: #32b16d;
 }
 
 .question-box {
-  font-family: 'Noto Sans JP', sans-serif;
   font-weight: bold;
   margin-bottom: 2rem;
   padding: 1rem 1rem;
@@ -214,8 +217,7 @@ h4 {
 }
 
 .option {
-  font-family: 'Noto Sans JP', sans-serif;
-  font-weight: bold;
+  font-weight:  500;
   display: flex;
   align-items: center;
   font-size: 1rem;
@@ -258,7 +260,6 @@ h4 {
 
 
 .next-button {
-  font-family: 'Noto Sans JP', sans-serif;
   font-weight: bold;
   width: 100%;
   margin-top: 0.5rem;

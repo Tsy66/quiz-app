@@ -92,6 +92,11 @@
       display: flex;
       height: 100vh;
       margin-left: 1rem;
+      background-image: url('@/assets/img/masaaki-komori-14cHwhRKJh8-unsplash.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
     }
 
     .content {

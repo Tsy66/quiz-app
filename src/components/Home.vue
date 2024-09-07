@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="top"></div>
-    <h3>観光日本語でGO!</h3>
+    <h4>観光日本語を学ぼう！</h4>
     <div class="gap"></div>
     <router-link to="/login" class="waves-effect waves-light ikuzo">Press Start</router-link>
   </div>
@@ -14,11 +14,11 @@
 </script>
 
 <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap');
 
   body {
-      font-family: "Darumadrop One", "DotGothic16";
-      font-weight: 400;
+      font-family: "Kiwi Maru", serif;
+      font-weight: bold !important;
       font-style: normal;
   }
 
@@ -48,7 +48,7 @@
     height: 100vh;
   }
 
-  h3 {
+  h4 {
     text-align: center;
     color: #fff;
   }
@@ -65,6 +65,9 @@
   .ikuzo{
     font-size: 30px;
     animation: slowBlink 3s infinite;
-    text-shadow: 2px 2px 5px rgba(254, 254, 254, 0.815);
+    text-shadow: 2px 2px 5px rgb(255, 255, 255);
+    font-family: "Darumadrop One", "DotGothic16";
+    font-weight: 400;
+    font-style: normal;
   }
 </style>
