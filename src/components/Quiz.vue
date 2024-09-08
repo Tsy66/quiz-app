@@ -42,7 +42,8 @@
   
 <script>
 import { db } from "@/config/firebaseConfig";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, setDoc, updateDoc, getDoc, increment } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import correctSound from '@/assets/sounds/correct_sound.mp3';
 import incorrectSound from '@/assets/sounds/incorrect_sound.mp3';
 
@@ -87,6 +88,7 @@ export default {
         const choicesSnapshot = await getDocs(choicesCollectionRef);
 
         let choices = choicesSnapshot.docs.map(choiceDoc => ({
+          choice_id: choiceDoc.data().choice_id,
           choice: choiceDoc.data().choice,
           isRight: choiceDoc.data().is_right_choice,
         }));
@@ -94,6 +96,7 @@ export default {
         choices = this.shuffleArray(choices);
 
         return {
+          question_id: questionDoc.id,
           question: questionDoc.data().question,
           choices: choices,
         };
@@ -116,12 +119,25 @@ export default {
       this.progressWidth = currentProgress;
     },
     async submitAnswer() {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated");
+        return;
+      }
+
       const selectedChoice = this.currentQuestion.choices.find(
         (choice) => choice.choice === this.selectedOption
       );
       this.isAnswerChecked = true;
 
-      if (selectedChoice.isRight) {
+      const isRight = selectedChoice.isRight;
+      const quizId = this.$route.params.quizId;
+      const questionId = this.questions[this.currentIndex].question_id;
+      const choiceId = selectedChoice.choice_id;
+      const choiceText = selectedChoice.choice;
+
+      if (isRight) {
         this.correctCount++;  // 答對時累加
         this.resultMessage = this.successMessages[Math.floor(Math.random() * this.successMessages.length)];
         this.messageClass = "success";
@@ -133,8 +149,28 @@ export default {
         await this.$nextTick();
         this.playAudio('incorrect');
       }
+
+      // 儲存或更新 Firebase 資料庫中的作答結果
+      const userRef = doc(db, `user/${user.uid}/scores/${quizId}/questions/${questionId}`);
+      const userQuizDoc = await getDoc(userRef);
+
+      const answerData = {
+        choice_id: choiceId,
+        choice: choiceText,
+        is_right: isRight,
+        attempt_time: new Date(),
+      };
+
+      if (userQuizDoc.exists()) {
+        // 更新記錄
+        await updateDoc(userRef, answerData);
+      } else {
+        // 新增記錄
+        await setDoc(userRef, answerData);
+      }
     },
-    nextQuestion() {
+
+    async nextQuestion() {
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex++;
         this.currentQuestion = this.questions[this.currentIndex];
@@ -144,6 +180,25 @@ export default {
         this.resultMessage = '';
         this.updateProgress();
       } else {
+        // 更新總成績
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const quizId = this.$route.params.quizId;
+        const userScoreRef = doc(db, `user/${user.uid}/scores/${quizId}`);
+
+        const userScoreDoc = await getDoc(userScoreRef);
+        const scoreData = {
+          quiz_id: quizId,
+          correct_count: this.correctCount,
+          last_attempt_time: new Date(),
+        };
+
+        if (userScoreDoc.exists()) {
+          await updateDoc(userScoreRef, scoreData);
+        } else {
+          await setDoc(userScoreRef, scoreData);
+        }
+
         localStorage.setItem('quizResult', JSON.stringify({
           correctCount: this.correctCount,
           totalQuestions: this.questions.length
@@ -151,6 +206,7 @@ export default {
         this.$router.push({ name: 'QuizResult' });
       }
     },
+
     playAudio(result) {
       const audioElement = this.$refs.resultAudio;
       if (audioElement) {
