@@ -16,6 +16,7 @@ const assets = [
   '/src/components/Fallback.vue',
   '/src/components/Quiz.vue',
   '/src/components/QuizResult.vue',
+  '/src/components/Dashboard.vue',
   'https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap',
 ];
 
