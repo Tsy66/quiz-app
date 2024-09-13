@@ -3,11 +3,11 @@
       <ul>
         <h5>ようこそ 教師端 !</h5>
         <br>
-        <li><a href="/class">班級管理</a></li>
+        <li><a href="/class">🏫班級管理🧑‍🏫</a></li>
         <hr>
-        <li><a href="/dashboard">學生表現</a></li>
+        <li><a href="/dashboard">💯學生表現📊</a></li>
         <hr>
-        <li><a href="/levels">學習分析</a></li>
+        <li><a href="/levels">🚧學習分析🚧</a></li>
         <hr>
       </ul>
     </div>

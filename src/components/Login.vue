@@ -57,7 +57,7 @@ export default {
             router.push('/class');
           } else if (userData.user_role === 'student') {
             // 跳轉到學生頁面
-            router.push('/class');
+            router.push('/levels');
           } else {
             error.value = '未設定用戶角色';
           }

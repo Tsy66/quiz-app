@@ -17,15 +17,15 @@
             <canvas ref="scatterChart"></canvas>
         </div>
 
+        <h4>學生表現</h4>
         <div class="student-performance">
-            <h4>學生表現</h4>
             <ul>
-            <li v-for="student in students" :key="student.id">
-                <h4>{{ student.name }}</h4>
-                <p>班級: {{ student.class }}</p>
-                <p>總答對數: {{ student.correctCount }}</p>
-                <button @click="viewStudentDetails(student.id)">查看詳細</button>
-            </li>
+              <li v-for="student in students" :key="student.id">
+                  <h4>{{ student.name }}</h4>
+                  <p>班級: {{ student.class }}</p>
+                  <p>總答對數: {{ student.correctCount }}</p>
+                  <button @click="viewStudentDetails(student.id)">查看詳細</button>
+              </li>
             </ul>
 
             <div v-if="selectedStudent" class="student-details">
@@ -175,41 +175,47 @@
 
         // 如果已經有 Chart 實例，先銷毀它
         if (this.chart) {
-            this.chart.destroy();
+          this.chart.destroy();
         }
 
-        const data = {
-            labels: [this.selectedQuizId],
-            datasets: [{
-            label: `關卡 ${this.selectedQuizId} 學生答對題數`,
-            data: [{
-                x: this.selectedQuizId,
-                y: this.students.reduce((total, student) => total + student.correctCount, 0) // 總答對數
-            }],
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-            }]
-        };
+        // 計算每個答對題數對應的學生人數分布
+        const correctCounts = this.students.map(student => student.correctCount);
+        const distribution = correctCounts.reduce((acc, count) => {
+          acc[count] = (acc[count] || 0) + 1; // 統計每個答對題數對應的人數
+          return acc;
+        }, {});
+
+        // 轉換成陣列用於繪製圖表
+        const labels = Object.keys(distribution); // X 軸顯示的答對題數
+        const data = Object.values(distribution); // Y 軸顯示的對應人數
 
         // 創建新的 Chart 實例
         this.chart = new Chart(ctx, {
-            type: 'bar', // 設置為長條圖
-            data: data,
-            options: {
+          type: 'bar', // 設置為長條圖
+          data: {
+            labels: labels,
+            datasets: [{
+              label: `${this.selectedQuizId} 成績人數`,
+              data: data,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
             scales: {
-                x: {
-                title: { display: false, text: '關卡' },
-                stacked: true
-                },
-                y: {
-                title: { display: true, text: '答對題數' },
+              x: {
+                title: { display: true, text: '答對題數' }, // X 軸顯示答對題數
                 beginAtZero: true
-                }
+              },
+              y: {
+                title: { display: true, text: '學生人數' }, // Y 軸顯示人數
+                beginAtZero: true
+              }
             }
-            }
+          }
         });
-        }
+      }
     }
   };
   </script>
@@ -225,7 +231,7 @@
   }
   
   .filter-container {
-    display: block;
+    display: 1;
     max-width: 60rem;
     max-height: 50rem;
     margin: 2rem auto;
@@ -250,7 +256,8 @@
     max-width: 30rem;
     border-radius: 1rem;
     font-size: 1rem;
-
+    max-height: 15rem;
+    overflow: auto;
   }
 
   .student-performance ul {
@@ -264,6 +271,7 @@
   
   .student-details {
     margin-top: 20px;
+    max-width: 40rem;
   }
 
   #quizSelect {
