@@ -8,6 +8,7 @@ import Levels from '@/components/Levels.vue';
 import Quiz from '@/components/Quiz.vue';
 import QuizResult from '@/components/QuizResult.vue';
 import Dashboard from '@/components/Dashboard.vue';
+import ResetPwd from '@/components/ResetPwd.vue';
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -18,12 +19,13 @@ const routes = [
   { path: '/quiz/:quizId', name: 'Quiz', component: Quiz, props: true, },
   { path: '/quizresult', name: 'QuizResult', component: QuizResult},
   { path: '/dashboard', name: 'Dashboard', component: Dashboard},
+  { path: '/resetpwd', name: 'ResetPwd', component: ResetPwd},
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 });
 
 
-export default router
+export default router;

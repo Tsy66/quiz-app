@@ -118,7 +118,6 @@ export default {
         // 檢查電子郵件是否已經註冊
         const signInMethods = await fetchSignInMethodsForEmail(auth, email);
         if (signInMethods.length > 0) {
-          console.warn(`電子郵件 ${email} 已經被註冊，跳過此用戶。`);
           skippedCount++;
           continue;
         }
@@ -133,7 +132,6 @@ export default {
           const userDocRef = doc(db, "user", uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            console.warn(`uid ${uid} 已經存在於 Firestore，跳過此用戶。`);
             skippedCount++;
             continue;
           }
@@ -149,7 +147,6 @@ export default {
 
           successCount++;
         } catch (error) {
-          console.error(`Error importing user ${name}:`, error);
           errorCount++;
         }
       }

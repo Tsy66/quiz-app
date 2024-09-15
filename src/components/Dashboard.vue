@@ -1,55 +1,64 @@
-<template>
+  <template>
     <div class="dashboard-container">
       <Sidebar/>
-      
+
       <div class="filter-container">
         <h4>班級成績</h4>
-        <div>
-            <label for="quizSelect">選擇關卡:</label>
-            <select id="quizSelect" v-model="selectedQuizId" @change="loadQuizPerformance">
+        <div class="qselect">
+          <label for="quizSelect">選擇關卡:</label>
+          <select id="quizSelect" v-model="selectedQuizId" @change="loadQuizPerformance">
             <option v-for="quiz in quizzes" :key="quiz.id" :value="quiz.id">
-                {{ quiz.id + quiz.title }}
+              {{ quiz.id + quiz.title }}
             </option>
-            </select>
+          </select>
+        </div>
+
+        <div class="class-select">
+          <label for="classSelect">選擇班級:</label>
+          <select id="classSelect" v-model="selectedClass" @change="loadQuizPerformance">
+            <option v-for="classItem in classes" :key="classItem" :value="classItem">
+              {{ classItem }}
+            </option>
+          </select>
         </div>
 
         <div class="chart-container">
-            <canvas ref="scatterChart"></canvas>
+          <canvas ref="scatterChart"></canvas>
         </div>
 
-        <h4>學生表現</h4>
+        <h4 class="sperform">學生表現</h4>
         <div class="student-performance">
+          <ul>
+            <li v-for="student in students" :key="student.id">
+              <h4>{{ student.name }}</h4>
+              <p>班級: {{ student.class }}</p>
+              <p>總答對數: {{ student.correctCount }}</p>
+              <button @click="viewStudentDetails(student.id)">查看詳細</button>
+            </li>
+          </ul>
+
+          <div v-if="selectedStudent" class="student-details">
+            <h3>{{ selectedStudent.name }} 的答題詳細</h3>
             <ul>
-              <li v-for="student in students" :key="student.id">
-                  <h4>{{ student.name }}</h4>
-                  <p>班級: {{ student.class }}</p>
-                  <p>總答對數: {{ student.correctCount }}</p>
-                  <button @click="viewStudentDetails(student.id)">查看詳細</button>
+              <li v-for="result in selectedStudent.results" :key="result.questionId">
+                <p>問題: {{ result.question }}</p>
+                <p>選擇: {{ result.choice }}</p>
+                <p>是否正確: {{ result.isRight ? '正確' : '錯誤' }}</p>
               </li>
             </ul>
-
-            <div v-if="selectedStudent" class="student-details">
-                <h3>{{ selectedStudent.name }} 的答題詳細</h3>
-                <ul>
-                <li v-for="result in selectedStudent.results" :key="result.questionId">
-                    <p>問題: {{ result.question }}</p>
-                    <p>選擇: {{ result.choice }}</p>
-                    <p>是否正確: {{ result.isRight ? '正確' : '錯誤' }}</p>
-                </li>
-                </ul>
-            </div>
+          </div>
         </div>
       </div>
-
     </div>
   </template>
-  
+
   <script>
+  import { nextTick } from 'vue';
   import { db } from "@/config/firebaseConfig";
   import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
   import Chart from 'chart.js/auto';
   import Sidebar from "@/components/Sidebar.vue";
-  
+
   export default {
     name: 'Dashboard',
     components: {
@@ -58,7 +67,9 @@
     data() {
       return {
         selectedQuizId: null,
+        selectedClass: null,
         quizzes: [],
+        classes: [],
         students: [],
         selectedStudent: null,
         chart: null,
@@ -67,6 +78,7 @@
     async created() {
       await this.loadStudentPerformance();
       await this.loadQuizzes();
+      await this.loadClasses();
       this.renderChart();
     },
     methods: {
@@ -76,43 +88,56 @@
         const quizSnapshot = await getDocs(quizzesRef);
 
         this.quizzes = quizSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
+          const data = doc.data();
+          return {
             id: data.quiz_id, // 使用正確的 ID 屬性
             title: data.title,
-            };
+          };
         });
 
         // 對關卡進行排序
         this.quizzes.sort((a, b) => {
-            const numA = parseInt(a.id.replace('ch', ''));
-            const numB = parseInt(b.id.replace('ch', ''));
-            return numA - numB;
+          const numA = parseInt(a.id.replace('ch', ''));
+          const numB = parseInt(b.id.replace('ch', ''));
+          return numA - numB;
         });
+      },
 
-        console.log(this.quizzes); // 確認排序後的結果
-        },
-
-      async loadQuizPerformance() {
-        if (!this.selectedQuizId) return;
-
-        // 根據選擇的關卡載入班級成績資料
+      async loadClasses() {
+        // 載入所有班級資料
         const studentsRef = collection(db, "user");
         const q = query(studentsRef, where("user_role", "==", "student"));
         const studentSnapshot = await getDocs(q);
 
-        this.students = await Promise.all(studentSnapshot.docs.map(async (doc) => {
-            const studentData = doc.data();
-            const scoresRef = collection(db, `user/${doc.id}/scores/${this.selectedQuizId}/questions`);
-            const scoresSnapshot = await getDocs(scoresRef);
-            const correctCount = scoresSnapshot.docs.reduce((count, scoreDoc) => count + (scoreDoc.data().is_right ? 1 : 0), 0);
+        const classSet = new Set();
+        studentSnapshot.docs.forEach(doc => {
+          const studentData = doc.data();
+          classSet.add(studentData.user_class);
+        });
 
-            return {
+        this.classes = Array.from(classSet).sort(); // 將班級按字母排序
+      },
+
+      async loadQuizPerformance() {
+        if (!this.selectedQuizId || !this.selectedClass) return;
+
+        // 根據選擇的關卡和班級載入成績資料
+        const studentsRef = collection(db, "user");
+        const q = query(studentsRef, where("user_role", "==", "student"), where("user_class", "==", this.selectedClass));
+        const studentSnapshot = await getDocs(q);
+
+        this.students = await Promise.all(studentSnapshot.docs.map(async (doc) => {
+          const studentData = doc.data();
+          const scoresRef = collection(db, `user/${doc.id}/scores/${this.selectedQuizId}/questions`);
+          const scoresSnapshot = await getDocs(scoresRef);
+          const correctCount = scoresSnapshot.docs.reduce((count, scoreDoc) => count + (scoreDoc.data().is_right ? 1 : 0), 0);
+
+          return {
             id: doc.id,
             name: studentData.user_name,
             class: studentData.user_class,
             correctCount: correctCount,
-            };
+          };
         }));
 
         this.renderChart();
@@ -123,13 +148,13 @@
         const studentsRef = collection(db, "user");
         const q = query(studentsRef, where("user_role", "==", "student"));
         const studentSnapshot = await getDocs(q);
-  
+
         this.students = await Promise.all(studentSnapshot.docs.map(async (doc) => {
           const studentData = doc.data();
           const scoresRef = collection(db, `user/${doc.id}/scores`);
           const scoresSnapshot = await getDocs(scoresRef);
           const correctCount = scoresSnapshot.docs.reduce((count, scoreDoc) => count + (scoreDoc.data().correct_count || 0), 0);
-  
+
           return {
             id: doc.id,
             name: studentData.user_name,
@@ -138,39 +163,40 @@
           };
         }));
       },
-      
+
       async viewStudentDetails(studentId) {
         // 顯示特定學生的詳細答題結果
         const studentRef = doc(db, `user/${studentId}`);
         const studentDoc = await getDoc(studentRef);
         const studentData = studentDoc.data();
-  
+
         const scoresRef = collection(db, `user/${studentId}/scores`);
         const scoresSnapshot = await getDocs(scoresRef);
-  
+
         const results = await Promise.all(scoresSnapshot.docs.map(async (scoreDoc) => {
           const scoreData = scoreDoc.data();
           const questionId = scoreData.question_id;
-  
+
           const questionRef = doc(db, `quizzes/${scoreData.quiz_id}/questions/${questionId}`);
           const questionDoc = await getDoc(questionRef);
           const questionData = questionDoc.data();
-  
+
           return {
             questionId: questionId,
-            question: questionData.question,
+            // question: questionData.question,
             choice: scoreData.choice,
             isRight: scoreData.is_right,
           };
         }));
-  
+
         this.selectedStudent = {
           name: studentData.user_name,
           results: results,
         };
       },
-      
-      renderChart() {
+
+      async renderChart() {
+        await nextTick(); 
         const ctx = this.$refs.scatterChart.getContext('2d');
 
         // 如果已經有 Chart 實例，先銷毀它
@@ -219,6 +245,7 @@
     }
   };
   </script>
+
   
   <style scoped>
   .dashboard-container {
@@ -235,20 +262,22 @@
     max-width: 60rem;
     max-height: 50rem;
     margin: 2rem auto;
-    padding: 1.3rem;
+    padding: 1rem;
     border-radius: 1rem;
     background-color: #f9f9f971;
     font-size: 1rem;
-    margin-right: 50rem;
+    margin-right: 40rem;
+    margin-top: -1rem;
   }
 
   .chart-container {
     margin-bottom: 20px;
-    width: 30rem;
+    width: 40rem;
+    height: 40rem;
   }
-  
-  .chart-container canvas{
-    width: 30rem;
+
+  .sperform {
+    margin-top: -20rem;
   }
 
   .student-performance {
@@ -277,5 +306,46 @@
   #quizSelect {
     display: block;
     visibility: visible;
+  }
+
+  .qselect {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .qselect label {
+    color: black;
+    font-size: 14px;
+  }
+
+  .qselect select {
+    width: 10rem;
+    height: 2rem;
+    margin-left: 1rem;
+  }
+
+  .class-select {
+    margin: 10px 0;
+    display: flex;
+    direction: ltr;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    margin-right: -14rem;
+    margin-top: -2.6rem;
+  }
+
+  .class-select select {
+    display: block;
+    width: 10rem;
+    height: 2rem;
+    margin-left: 1rem;
+  }
+
+  .class-select label {
+    color: black;
+    font-size: 14px;
   }
   </style>

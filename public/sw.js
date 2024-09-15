@@ -1,5 +1,5 @@
-const staticCacheName = 'static-static-v3';
-const dynamicCacheName = 'site-dynamic-v2';
+const staticCacheName = 'static-static-v4';
+const dynamicCacheName = 'site-dynamic-v3';
 const assets = [
   '/',
   '/index.html',
@@ -17,6 +17,7 @@ const assets = [
   '/src/components/Quiz.vue',
   '/src/components/QuizResult.vue',
   '/src/components/Dashboard.vue',
+  '/src/components/ResetPwd.vue',
   'https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap',
 ];
 
@@ -58,20 +59,27 @@ self.addEventListener('activate', evt => {
 
 //fetch event
 self.addEventListener('fetch', evt => {
-  //  console.log('fetch event', evt);
-  evt.respondWith(
-    caches.match(evt.request).then(cacheRes => {
-      return cacheRes || fetch(evt.request).then(fetchRes => {
-        return caches.open(dynamicCacheName).then(cache => {
-          cache.put(evt.request.url, fetchRes.clone());
-          limitCacheSize(dynamicCacheName, 30); //if over 30 items, delete oldest one
-          return fetchRes;
-        })
-      });
-    }).catch(() => {
-      if(evt.request.url.indexOf('.html') > -1){
-        return caches.match('/pages/fallback.html');
-      }
-    })
-  );
+  if (evt.request.mode === 'navigate') {
+    evt.respondWith(
+      fetch(evt.request).catch(() => {
+        return caches.match('/index.html');
+      })
+    );
+  } else {
+    evt.respondWith(
+      caches.match(evt.request).then(cacheRes => {
+        return cacheRes || fetch(evt.request).then(fetchRes => {
+          return caches.open(dynamicCacheName).then(cache => {
+            cache.put(evt.request.url, fetchRes.clone());
+            limitCacheSize(dynamicCacheName, 30); // 如果超過 30 項，刪除最舊的一項
+            return fetchRes;
+          });
+        });
+      }).catch(() => {
+        if (evt.request.url.indexOf('.html') > -1) {
+          return caches.match('/pages/fallback.html');
+        }
+      })
+    );
+  }
 });

@@ -39,9 +39,9 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Dela+Gothic+One&family=DotGothic16&display=swap');
 
 body, h2, div {
-    font-family: "Darumadrop One", "DotGothic16";
-    font-weight: 400;
-    font-style: normal;
+  font-family: "Darumadrop One", "DotGothic16";
+  font-weight: 400;
+  font-style: normal;
 }
 
 meta[name="viewport"] {

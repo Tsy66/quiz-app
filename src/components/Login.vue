@@ -5,17 +5,18 @@
       <h3>ログイン</h3>
       <form id="login-form" @submit.prevent="signIn">
         <div class="input-field">
-          <input type="text" id="email" placeholder="帳號 アカウント" v-model="email" required>
+          <input type="text" id="email" class="ph" placeholder="帳號 アカウント" v-model="email" required>
           <label for="email"></label>
         </div>
         <div class="input-field">
-          <input type="password" id="password" placeholder="密碼 パスワード" v-model="password" required>
+          <input type="password" id="password" class="ph" placeholder="密碼 パスワード" v-model="password" required>
           <label for="password"></label>
           <span id="toggle-password" @click="togglePasswordVisibility">
             <i :class="passwordIcon"></i>
           </span>
         </div>
         <button type="submit" class="btn waves-effect waves-light">登入</button>
+        <a href="/resetpwd" class="resetpwd">重設密碼</a>
         <p v-if="error">{{ error }}</p>
       </form>
     </div>
@@ -44,7 +45,6 @@ export default {
       try {
         // 使用 Firebase Authentication 登入
         const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
-        // console.log('User signed in:', userCredential.user.uid);
 
         // 查詢 Firestore 獲取用戶角色
         const userDoc = doc(db, 'user', userCredential.user.uid);
@@ -65,8 +65,7 @@ export default {
           error.value = '用戶資料不存在';
         }
       } catch (err) {
-        console.error('Firebase Error:', err); 
-        error.value = '登入失敗: ' + err.message;
+        error.value = '登入失敗';
       }
     };
 
@@ -113,6 +112,22 @@ export default {
     height: 100vh;
   }
 
+  .ph {
+    color: rgb(234, 255, 0);
+  }
+
+  p {
+    color: rgb(234, 255, 0);
+  }
+
+  .resetpwd {
+    display: flex;
+    color: #d2d173eb;
+    flex-direction: column;
+    justify-content: center;
+    text-decoration: underline;
+  }
+
   .top{
     width: 100%;
     max-width: 400px;
@@ -121,8 +136,10 @@ export default {
   
   .container {
     width: 100%;
+    height: 100%;
     max-width: 400px;
-    background: #ffffff00;
+    max-height: 100rem;
+    background: #ffffff0e;
     padding: 2rem;
   }
   
