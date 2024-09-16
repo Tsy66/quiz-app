@@ -23,29 +23,50 @@
         </div>
 
         <div class="chart-container">
-          <canvas ref="scatterChart"></canvas>
+          <canvas v-if="students.length" ref="scatterChart"></canvas>
         </div>
 
         <h4 class="sperform">學生表現</h4>
         <div class="student-performance">
-          <ul>
-            <li v-for="student in students" :key="student.id">
-              <h4>{{ student.name }}</h4>
-              <p>班級: {{ student.class }}</p>
-              <p>總答對數: {{ student.correctCount }}</p>
-              <button @click="viewStudentDetails(student.id)">查看詳細</button>
-            </li>
-          </ul>
+          <!-- 學生總覽表格 -->
+          <table>
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>班級</th>
+                <th>總答對數</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="student in students" :key="student.id">
+                <td>{{ student.name }}</td>
+                <td>{{ student.class }}</td>
+                <td>{{ student.correctCount }}</td>
+                <td><button @click="viewStudentDetails(student.id)" class="btn">查看詳細</button></td>
+              </tr>
+            </tbody>
+          </table>
 
+          <!-- 選擇學生後的詳細答題結果 -->
           <div v-if="selectedStudent" class="student-details">
             <h3>{{ selectedStudent.name }} 的答題詳細</h3>
-            <ul>
-              <li v-for="result in selectedStudent.results" :key="result.questionId">
-                <p>問題: {{ result.question }}</p>
-                <p>選擇: {{ result.choice }}</p>
-                <p>是否正確: {{ result.isRight ? '正確' : '錯誤' }}</p>
-              </li>
-            </ul>
+            <table>
+              <thead>
+                <tr>
+                  <th>問題</th>
+                  <th>選擇</th>
+                  <th>是否正確</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="result in selectedStudent.results" :key="result.questionId">
+                  <td>{{ result.question }}</td>
+                  <td>{{ result.choice }}</td>
+                  <td>{{ result.isRight ? '正確' : '錯誤' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -140,7 +161,12 @@
           };
         }));
 
-        this.renderChart();
+        this.$nextTick(() => {
+          if (this.chart) {
+            this.chart.destroy(); // 確保 Chart.js 實例完全銷毀
+          }
+          this.renderChart(); // 在 DOM 更新後重新渲染圖表
+        });
       },
 
       async loadStudentPerformance() {
@@ -196,8 +222,19 @@
       },
 
       async renderChart() {
-        await nextTick(); 
-        const ctx = this.$refs.scatterChart.getContext('2d');
+        await this.$nextTick(); // 確保 DOM 更新完成
+
+        const canvas = this.$refs.scatterChart;
+        if (!canvas) {
+          console.error('Canvas element not found');
+          return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          console.error('Failed to get 2D context from canvas');
+          return;
+        }
 
         // 如果已經有 Chart 實例，先銷毀它
         if (this.chart) {
@@ -207,11 +244,10 @@
         // 計算每個答對題數對應的學生人數分布
         const correctCounts = this.students.map(student => student.correctCount);
         const distribution = correctCounts.reduce((acc, count) => {
-          acc[count] = (acc[count] || 0) + 1; // 統計每個答對題數對應的人數
+          acc[count] = (acc[count] || 0) + 1;
           return acc;
         }, {});
 
-        // 轉換成陣列用於繪製圖表
         const labels = Object.keys(distribution); // X 軸顯示的答對題數
         const data = Object.values(distribution); // Y 軸顯示的對應人數
 
@@ -231,11 +267,11 @@
           options: {
             scales: {
               x: {
-                title: { display: true, text: '答對題數' }, // X 軸顯示答對題數
+                title: { display: true, text: '答對題數' },
                 beginAtZero: true
               },
               y: {
-                title: { display: true, text: '學生人數' }, // Y 軸顯示人數
+                title: { display: true, text: '學生人數' },
                 beginAtZero: true
               }
             }
@@ -270,6 +306,10 @@
     margin-top: -1rem;
   }
 
+  .filter-container h4 {
+    color: rgb(13, 47, 119);
+  }
+
   .chart-container {
     margin-bottom: 20px;
     width: 40rem;
@@ -278,11 +318,21 @@
 
   .sperform {
     margin-top: -20rem;
+    color: rgb(13, 47, 119);
+  }
+
+  .btn {
+    background-color: aliceblue;
+    color: rgb(13, 47, 119);
+    font-family: "Kiwi Maru", serif;
+    font-style: normal;
+    margin-bottom: 1rem;
+    border-radius: 0.8rem;
   }
 
   .student-performance {
     display: block;
-    max-width: 30rem;
+    max-width: 40rem;
     border-radius: 1rem;
     font-size: 1rem;
     max-height: 15rem;
@@ -315,7 +365,7 @@
   }
 
   .qselect label {
-    color: black;
+    color: rgb(13, 47, 119);
     font-size: 14px;
   }
 
@@ -345,7 +395,18 @@
   }
 
   .class-select label {
-    color: black;
+    color: rgb(13, 47, 119);
     font-size: 14px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(207, 206, 206, 0.856);
+    border-radius: 10px;
   }
   </style>
